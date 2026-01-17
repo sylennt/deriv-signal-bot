@@ -1,10 +1,10 @@
-def build_trade(entry, direction, sr, balance, risk_percent):
+def risk_model(entry, direction, levels, balance, risk_percent):
     if direction == "buy":
-        stop = sr["support"]
-        target = sr["resistance"]
+        stop = levels["support"]
+        target = levels["resistance"]
     else:
-        stop = sr["resistance"]
-        target = sr["support"]
+        stop = levels["resistance"]
+        target = levels["support"]
 
     risk = abs(entry - stop)
     reward = abs(target - entry)
@@ -20,9 +20,9 @@ def build_trade(entry, direction, sr, balance, risk_percent):
     lot = round(risk_amount / risk, 2)
 
     return {
-        "entry": entry,
-        "stop": stop,
-        "target": target,
+        "entry": round(entry, 2),
+        "stop": round(stop, 2),
+        "target": round(target, 2),
         "rr": rr,
         "lot": lot
     }
