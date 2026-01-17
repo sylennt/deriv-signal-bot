@@ -1,12 +1,28 @@
-def trade_levels(entry, sweep_low, sweep_high, direction):
-    buffer = 5
-
-    if direction == "BUY":
-        sl = sweep_low - buffer
-        tp = entry + (entry - sl) * 2
-
+def build_trade(entry, direction, sr, balance, risk_percent):
+    if direction == "buy":
+        stop = sr["support"]
+        target = sr["resistance"]
     else:
-        sl = sweep_high + buffer
-        tp = entry - (sl - entry) * 2
+        stop = sr["resistance"]
+        target = sr["support"]
 
-    return sl, tp
+    risk = abs(entry - stop)
+    reward = abs(target - entry)
+
+    if risk == 0:
+        return None
+
+    rr = round(reward / risk, 2)
+    if rr < 1.5:
+        return None
+
+    risk_amount = balance * (risk_percent / 100)
+    lot = round(risk_amount / risk, 2)
+
+    return {
+        "entry": entry,
+        "stop": stop,
+        "target": target,
+        "rr": rr,
+        "lot": lot
+    }
