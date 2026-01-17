@@ -1,13 +1,15 @@
 from deriv_ws import get_candles
-from market_data import candles_to_df
-from structure import detect_trend, find_support_resistance
-from entry import entry_signal
-from risk import build_trade
+from market_data import to_df
+from structure import detect_trend, structure_levels
+from liquidity import liquidity_sweep
+from entry import entry_price
+from risk import risk_model
 
-def analyze_symbol(symbol, balance, risk_percent):
-    df_4h = candles_to_df(get_candles(symbol, 14400))
-    df_1h = candles_to_df(get_candles(symbol, 3600))
-    df_15m = candles_to_df(get_candles(symbol, 900))
+def analyze(symbol, balance, risk_percent):
+    df_4h = to_df(get_candles(symbol, 14400))
+    df_1h = to_df(get_candles(symbol, 3600))
+    df_15m = to_df(get_candles(symbol, 900))
+    df_5m = to_df(get_candles(symbol, 300))
 
     trend_4h = detect_trend(df_4h)
     trend_1h = detect_trend(df_1h)
@@ -15,16 +17,21 @@ def analyze_symbol(symbol, balance, risk_percent):
     if trend_4h != trend_1h or trend_4h == "range":
         return None
 
-    sr = find_support_resistance(df_15m)
-    direction, entry = entry_signal(df_15m, trend_4h, sr)
+    direction = "buy" if trend_4h == "bullish" else "sell"
 
-    if not direction:
+    if not liquidity_sweep(df_5m, direction):
         return None
 
-    trade = build_trade(entry, direction, sr, balance, risk_percent)
+    levels = structure_levels(df_15m)
+    entry = entry_price(df_5m, direction)
+
+    trade = risk_model(entry, direction, levels, balance, risk_percent)
     if not trade:
         return None
 
-    trade["symbol"] = symbol
-    trade["direction"] = direction
+    trade.update({
+        "symbol": symbol,
+        "direction": direction.upper()
+    })
+
     return trade
