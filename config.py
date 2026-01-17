@@ -1,1 +1,18 @@
+DERIV_APP_ID = "1089"  # public Deriv app id (safe)
+TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+TELEGRAM_CHAT_ID = "YOUR_CHAT_ID"
+
+SYMBOLS = [
+    "R_100",
+    "R_75",
+    "R_50",
+    "BOOM1000",
+    "BOOM500",
+    "CRASH1000",
+    "CRASH500"
+]
+
+BALANCE = 50.0
+RISK_PERCENT = 1.0
+SCAN_INTERVAL_SECONDS = 900  # 15 minutes
 
