@@ -1,11 +1,3 @@
-from deriv_ws import get_candles
-from market_data import to_df
-from structure import detect_trend, support_resistance
-from liquidity import liquidity_sweep
-from entry import entry_signal
-from risk import build_trade
-
-
 def analyze(symbol, balance, risk_percent):
     candles_4h = get_candles(symbol, 14400)
     candles_1h = get_candles(symbol, 3600)
