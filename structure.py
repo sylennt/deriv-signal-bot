@@ -1,17 +1,30 @@
+from deriv_ws import get_candles
+from market_data import to_df
+from structure import detect_trend, support_resistance
+from liquidity import liquidity_sweep
+from entry import entry_signal
+from risk import build_trade
+
 def detect_trend(df):
-    highs = df["high"].tail(30)
-    lows = df["low"].tail(30)
+    highs = df["high"].tail(20)
+    lows = df["low"].tail(20)
 
     if highs.is_monotonic_increasing and lows.is_monotonic_increasing:
         return "bullish"
+
     if highs.is_monotonic_decreasing and lows.is_monotonic_decreasing:
         return "bearish"
+
     return "range"
 
 
-def structure_levels(df):
-    recent = df.tail(60)
+def support_resistance(df):
+    recent = df.tail(50)
+
+    support = recent["low"].min()
+    resistance = recent["high"].max()
+
     return {
-        "support": recent["low"].min(),
-        "resistance": recent["high"].max()
+        "support": support,
+        "resistance": resistance
     }
