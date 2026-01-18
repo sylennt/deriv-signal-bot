@@ -1,42 +1,24 @@
-from deriv_ws import get_candles
-from market_data import to_df
-from structure import detect_trend, support_resistance
-from liquidity import liquidity_sweep
-from entry import entry_signal
-from risk import build_trade
+def detect_trend(df):
+    highs = df["high"].tail(20)
+    lows = df["low"].tail(20)
 
-def analyze(symbol, balance, risk_percent):
-    candles_4h = get_candles(symbol, 14400)
-    candles_1h = get_candles(symbol, 3600)
-    candles_15m = get_candles(symbol, 900)
+    if highs.is_monotonic_increasing and lows.is_monotonic_increasing:
+        return "bullish"
 
-    if not candles_4h or not candles_1h or not candles_15m:
-        return None
+    if highs.is_monotonic_decreasing and lows.is_monotonic_decreasing:
+        return "bearish"
 
-    df_4h = to_df(candles_4h)
-    df_1h = to_df(candles_1h)
-    df_15m = to_df(candles_15m)
+    return "range"
 
-    trend_4h = detect_trend(df_4h)
-    trend_1h = detect_trend(df_1h)
 
-    if trend_4h != trend_1h or trend_4h == "range":
-        return None
+def support_resistance(df):
+    recent = df.tail(50)
 
-    sr = support_resistance(df_15m)
-    sweep = liquidity_sweep(df_15m)
+    support = recent["low"].min()
+    resistance = recent["high"].max()
 
-    if not sweep:
-        return None
+    return {
+        "support": support,
+        "resistance": resistance
+    }
 
-    direction, entry = entry_signal(df_15m, trend_4h, sr, sweep)
-    if not direction:
-        return None
-
-    trade = build_trade(entry, direction, sr, balance, risk_percent)
-    if not trade:
-        return None
-
-    trade["symbol"] = symbol
-    trade["direction"] = direction
-    return trade
